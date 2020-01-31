@@ -1,0 +1,40 @@
+package java.com.canalplus.service;
+
+import com.architecture.canalplus.dao.IAbonneRepository;
+import com.architecture.canalplus.dao.IContratRepository;
+import com.architecture.canalplus.model.Abonne;
+import com.architecture.canalplus.model.Contrat;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
+@Service
+@Transactional
+public class AbonneServiceImpl implements AbonneService {
+
+    @Autowired
+    ContratRepository contratRepository;
+    @Autowired
+    AbonneRepository abonneRepository;
+    @Override
+    public Abonne ModifierAdresseAbonne(String newAdresse, String codeAbonne) {
+        Optional<Abonne> abonne=this.abonneRepository.findById(codeAbonne);
+        if(abonne.isPresent()){
+            Abonne abonne1=abonne.get();
+            abonne1.setAdresse(newAdresse);
+            List<Contrat> contrats=abonne1.getContrats();
+
+            contrats.forEach(contrat -> {
+                    contrat.setAdresseAbonne(newAdresse);
+                    contratRepository.save(contrat);
+            });
+            this.abonneRepository.save(abonne1);
+
+        }else{
+            throw new RuntimeException("Erreur");
+        }
+        return abonne.get();
+    }
+}
